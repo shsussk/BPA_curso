@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPA Banano — ADOBANANO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* ── TOKENS ────────────────────────────────── */
+    :root, [data-theme="light"] {
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      --text-xs:   clamp(0.75rem,  0.7rem + 0.25vw, 0.875rem);
+      --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem,    0.95rem + 0.25vw, 1.125rem);
+      --text-lg:   clamp(1.125rem,  1rem  + 0.75vw, 1.5rem);
+      --text-xl:   clamp(1.5rem,   1.2rem + 1.25vw, 2.25rem);
+      --text-2xl:  clamp(2rem,     1.2rem + 2.5vw,  3.5rem);
+      --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+      --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+      --space-12:3rem;--space-16:4rem;--space-20:5rem;
+      --color-bg:           #f5f7f2;
+      --color-surface:      #ffffff;
+      --color-surface-2:    #f9faf7;
+      --color-surface-offset:#eef2eb;
+      --color-border:       rgba(40,60,20,0.10);
+      --color-divider:      rgba(40,60,20,0.07);
+      --color-text:         #1a2410;
+      --color-text-muted:   #5a6b4a;
+      --color-text-faint:   #9aaa8a;
+      --color-primary:      #2d7a1c;
+      --color-primary-hover:#1f5c12;
+      --color-primary-active:#164009;
+      --color-primary-tint: #e6f2e0;
+      --color-accent:       #f59e0b;
+      --color-accent-light: #fef3c7;
+      --color-badge-1:      #dcfce7;
+      --color-badge-1-text: #166534;
+      --color-badge-2:      #dbeafe;
+      --color-badge-2-text: #1e40af;
+      --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(20,40,10,.06);
+      --shadow-md:0 4px 14px rgba(20,40,10,.09);
+      --shadow-lg:0 12px 32px rgba(20,40,10,.13);
+      --transition: 180ms cubic-bezier(.16,1,.3,1);
+      --sidebar-w: 280px;
+      --header-h: 64px;
+    }
+    [data-theme="dark"] {
+      --color-bg:           #111510;
+      --color-surface:      #181d14;
+      --color-surface-2:    #1e2419;
+      --color-surface-offset:#232b1e;
+      --color-border:       rgba(200,230,180,.10);
+      --color-divider:      rgba(200,230,180,.06);
+      --color-text:         #d4e0c8;
+      --color-text-muted:   #7a9068;
+      --color-text-faint:   #4a5c3c;
+      --color-primary:      #5db84a;
+      --color-primary-hover:#7acc5f;
+      --color-primary-active:#9dde87;
+      --color-primary-tint: #1a2d14;
+      --color-accent:       #fbbf24;
+      --color-accent-light: #2d2410;
+      --color-badge-1:      #14361f;
+      --color-badge-1-text: #6ee7a0;
+      --color-badge-2:      #172040;
+      --color-badge-2-text: #93c5fd;
+      --shadow-sm:0 1px 3px rgba(0,0,0,.25);
+      --shadow-md:0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.45);
+    }
+    /* ── BASE ───────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; -webkit-text-size-adjust:none; text-size-adjust:none; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      min-height: 100dvh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, video { display:block; max-width:100%; }
+    button { cursor:pointer; background:none; border:none; font:inherit; color:inherit; }
+    input, select, textarea { font:inherit; color:inherit; }
+    a { color: inherit; text-decoration: none; }
+    .sr-only { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+
+    /* ── LAYOUT ─────────────────────────────────── */
+    #app { display:flex; flex-direction:column; min-height:100dvh; }
+    
+    /* HEADER */
+    .header {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      height: var(--header-h);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center;
+      padding: 0 var(--space-4);
+      gap: var(--space-3);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-logo {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .header-logo svg { color: var(--color-primary); }
+    .header-title {
+      flex: 1;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      display: none;
+    }
+    @media (min-width: 640px) { .header-title { display: block; } }
+    .header-actions { display:flex; align-items:center; gap: var(--space-2); margin-left:auto; }
+    .btn-icon {
+      width:38px; height:38px;
+      border-radius: var(--radius-md);
+      display:flex; align-items:center; justify-content:center;
+      color: var(--color-text-muted);
+      transition: background var(--transition), color var(--transition);
+    }
+    .btn-icon:hover { background: var(--color-surface-offset); color: var(--color-text); }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; top: var(--header-h); left:0; bottom:0;
+      width: var(--sidebar-w);
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      overflow-y: auto; overflow-x: hidden;
+      z-index: 90;
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform var(--transition);
+      padding-bottom: var(--space-8);
+    }
+    .sidebar.open { transform: translateX(0); }
+    @media (min-width: 1024px) {
+      .sidebar { transform: translateX(0); }
+      .main { margin-left: var(--sidebar-w); }
+    }
+    .sidebar-section-label {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-text-faint);
+      padding: var(--space-5) var(--space-4) var(--space-2);
+    }
+    .module-item {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: 0;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      position: relative;
+    }
+    .module-item:hover { background: var(--color-surface-offset); }
+    .module-item.active {
+      background: var(--color-primary-tint);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+    .module-item.active::before {
+      content: '';
+      position: absolute; left:0; top:0; bottom:0;
+      width: 3px; background: var(--color-primary);
+      border-radius: 0 2px 2px 0;
+    }
+    .module-num {
+      width: 26px; height: 26px;
+      border-radius: var(--radius-full);
+      background: var(--color-surface-offset);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xs); font-weight: 700;
+      flex-shrink: 0;
+      transition: background var(--transition), color var(--transition);
+    }
+    .module-item.active .module-num {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .module-name {
+      font-size: var(--text-sm); line-height: 1.35;
+    }
+    .resource-count {
+      margin-left: auto;
+      font-size: var(--text-xs);
+      background: var(--color-surface-offset);
+      color: var(--color-text-muted);
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+      flex-shrink: 0;
+    }
+    .module-item.active .resource-count {
+      background: rgba(45,122,28,.15);
+      color: var(--color-primary);
+    }
+
+    /* OVERLAY */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset:0; z-index: 80;
+      background: rgba(0,0,0,.35);
+    }
+    .sidebar-overlay.show { display: block; }
+    @media (min-width: 1024px) { .sidebar-overlay { display:none !important; } }
+
+    /* MAIN */
+    .main {
+      margin-top: var(--header-h);
+      flex: 1; min-width: 0;
+      padding: var(--space-8) var(--space-4);
+    }
+    @media (min-width: 640px) { .main { padding: var(--space-10) var(--space-8); } }
+    @media (min-width: 1280px) { .main { padding: var(--space-12) var(--space-12); max-width: 1000px; } }
+
+    /* ── VIEWS ──────────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* HOME */
+    .home-hero {
+      background: linear-gradient(135deg, var(--color-primary-tint) 0%, var(--color-surface) 60%);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-10) var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+    .home-hero h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--color-primary);
+      line-height: 1.15;
+      margin-bottom: var(--space-3);
+    }
+    .home-hero p { color: var(--color-text-muted); max-width: 56ch; }
+    .home-badges { display:flex; flex-wrap:wrap; gap: var(--space-2); margin-top: var(--space-4); }
+    .badge {
+      font-size: var(--text-xs); font-weight: 600;
+      padding: 4px 12px; border-radius: var(--radius-full);
+    }
+    .badge-green { background: var(--color-badge-1); color: var(--color-badge-1-text); }
+    .badge-blue  { background: var(--color-badge-2); color: var(--color-badge-2-text); }
+    
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+      gap: var(--space-4);
+    }
+    .module-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+      display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .module-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+      border-color: var(--color-primary);
+    }
+    .module-card-num {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-lg);
+      background: var(--color-primary-tint);
+      color: var(--color-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: var(--text-base);
+    }
+    .module-card h3 {
+      font-size: var(--text-base); font-weight: 600; line-height: 1.3;
+    }
+    .module-card p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5; }
+    .module-card-footer {
+      margin-top: auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .module-card-footer .badge { font-size: 11px; }
+    .module-card-arrow { color: var(--color-text-faint); transition: color var(--transition), transform var(--transition); }
+    .module-card:hover .module-card-arrow { color: var(--color-primary); transform: translateX(3px); }
+
+    /* MODULE VIEW */
+    .module-header {
+      margin-bottom: var(--space-8);
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .module-header-top {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+    .module-big-num {
+      width: 52px; height: 52px; flex-shrink: 0;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: var(--text-lg);
+    }
+    .module-header h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      line-height: 1.2;
+    }
+    .module-header p { color: var(--color-text-muted); font-size: var(--text-sm); }
+
+    /* ADMIN TOGGLE */
+    .admin-bar {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      margin-bottom: var(--space-6);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: var(--space-3);
+    }
+    .admin-bar p { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm); font-weight: 600;
+      transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--color-primary); color: #fff;
+      border: 1px solid transparent;
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+    .btn-secondary:hover { background: var(--color-surface-offset); }
+    .btn-danger {
+      background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
+    }
+    .btn-danger:hover { background: #fee2e2; }
+    [data-theme="dark"] .btn-danger { background: #2d1212; color:#fca5a5; border-color:#4d1a1a; }
+    [data-theme="dark"] .btn-danger:hover { background: #3d1a1a; }
+
+    /* RESOURCES */
+    .resources-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .resource-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      display: flex; align-items: center; gap: var(--space-4);
+      transition: box-shadow var(--transition), border-color var(--transition);
+    }
+    .resource-card:hover { box-shadow: var(--shadow-sm); border-color: rgba(45,122,28,.2); }
+    .resource-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon-pdf { background: #fef2f2; color: #dc2626; }
+    .icon-video { background: #eff6ff; color: #2563eb; }
+    .icon-doc { background: #f0fdf4; color: #16a34a; }
+    .icon-ppt { background: #fff7ed; color: #ea580c; }
+    .icon-img { background: #fdf4ff; color: #9333ea; }
+    .icon-link { background: var(--color-surface-offset); color: var(--color-text-muted); }
+    [data-theme="dark"] .icon-pdf { background:#2d1212; color:#fca5a5; }
+    [data-theme="dark"] .icon-video { background:#172040; color:#93c5fd; }
+    [data-theme="dark"] .icon-doc { background:#0f2d14; color:#6ee7a0; }
+    [data-theme="dark"] .icon-ppt { background:#2d1a0a; color:#fdba74; }
+    [data-theme="dark"] .icon-img { background:#2d1240; color:#d8b4fe; }
+    .resource-info { flex:1; min-width:0; }
+    .resource-name {
+      font-weight: 600; font-size: var(--text-sm);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .resource-meta { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+    .resource-actions { display:flex; gap: var(--space-2); flex-shrink:0; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center; padding: var(--space-16) var(--space-8);
+      color: var(--color-text-muted);
+    }
+    .empty-state-icon {
+      width: 56px; height: 56px;
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-xl);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-4);
+      color: var(--color-text-faint);
+    }
+    .empty-state h3 { color: var(--color-text); font-size: var(--text-base); margin-bottom: var(--space-2); }
+    .empty-state p { font-size: var(--text-sm); max-width: 32ch; margin: 0 auto var(--space-5); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.5);
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--space-4);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--color-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      width: 100%; max-width: 480px;
+      overflow: hidden;
+      transform: scale(.97) translateY(8px);
+      transition: transform var(--transition);
+    }
+    .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+    .modal-header {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-weight: 700; font-size: var(--text-base); }
+    .modal-body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); }
+    .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+    .form-label { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); }
+    .form-input, .form-select {
+      padding: var(--space-3) var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-2);
+      font-size: var(--text-sm);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      width: 100%;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(45,122,28,.12);
+    }
+    .upload-zone {
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8) var(--space-4);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--color-primary); background: var(--color-primary-tint); }
+    .upload-zone input[type=file] {
+      position: absolute; inset:0; opacity:0; cursor:pointer;
+    }
+    .upload-zone-icon { color: var(--color-text-faint); margin-bottom: var(--space-2); }
+    .modal-footer {
+      padding: var(--space-4) var(--space-6);
+      border-top: 1px solid var(--color-divider);
+      display: flex; justify-content: flex-end; gap: var(--space-3);
+    }
+
+    /* PASSWORD MODAL */
+    .pass-modal {
+      background: var(--color-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      width: 100%; max-width: 360px;
+      padding: var(--space-8) var(--space-6);
+      text-align: center;
+      transform: scale(.97) translateY(8px);
+      transition: transform var(--transition);
+    }
+    .modal-overlay.open .pass-modal { transform: scale(1) translateY(0); }
+    .pass-modal h3 { font-family: var(--font-display); font-size: var(--text-xl); margin-bottom: var(--space-2); }
+    .pass-modal p { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-5); }
+    .pass-error { color: #dc2626; font-size: var(--text-xs); margin-top: var(--space-2); min-height: 1.2em; }
+
+    /* TOAST */
+    #toast-container {
+      position: fixed; bottom: var(--space-6); right: var(--space-4); z-index: 300;
+      display: flex; flex-direction: column-reverse; gap: var(--space-2);
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--color-text);
+      color: var(--color-surface);
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm); font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0; transform: translateY(12px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: auto;
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .toast.success { background: var(--color-primary); }
+    .toast.error { background: #b91c1c; }
+
+    /* PROGRESS BAR */
+    .progress-bar-wrap {
+      height: 4px; background: var(--color-surface-offset);
+      border-radius: var(--radius-full); overflow: hidden; margin-top: var(--space-2);
+    }
+    .progress-bar { height: 100%; background: var(--color-primary); transition: width .3s; }
+
+    /* LOADING SPINNER */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+    .spinner-lg {
+      width: 36px; height: 36px; border-width: 3px;
+      margin: var(--space-12) auto;
+      display: block;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .resource-card { flex-wrap: wrap; }
+      .resource-actions { width: 100%; justify-content: flex-end; }
+      .admin-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <header class="header">
+    <button class="btn-icon" id="menu-toggle" aria-label="Abrir menú">
+      <i data-lucide="menu" width="20" height="20"></i>
+    </button>
+    <div class="header-logo">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-label="ADOBANANO logo">
+        <circle cx="16" cy="16" r="15" fill="currentColor" opacity=".12"/>
+        <path d="M16 4 C10 8 7 13 9 19 C11 23 16 26 16 26 C16 26 21 23 23 19 C25 13 22 8 16 4Z" fill="currentColor"/>
+        <path d="M16 9 C13 11.5 12 14.5 13.5 17.5 C14.5 19.5 16 21 16 21" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+      </svg>
+      <span>BPA Banano</span>
+    </div>
+    <div class="header-title" id="header-subtitle">Buenas Prácticas Agrícolas — ADOBANANO</div>
+    <div class="header-actions">
+      <button class="btn-icon" id="admin-toggle-btn" aria-label="Panel de administrador" title="Acceso administrador">
+        <i data-lucide="shield" width="18" height="18"></i>
+      </button>
+      <button class="btn-icon" data-theme-toggle aria-label="Cambiar tema">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR OVERLAY -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Inicio</div>
+    <div class="module-item" data-view="home" id="nav-home">
+      <div class="module-num" style="background:var(--color-surface-offset)">
+        <i data-lucide="home" width="12" height="12"></i>
+      </div>
+      <span class="module-name">Portada del curso</span>
+    </div>
+    <div class="sidebar-section-label">Módulos</div>
+    <div id="sidebar-modules"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- HOME VIEW -->
+    <div class="view active" id="view-home">
+      <div class="home-hero">
+        <h1>Buenas Prácticas Agrícolas en el Cultivo del Banano</h1>
+        <p>Curso taller de 12 horas — ADOBANANO · Provincias Monte Cristi, Santiago y Valverde</p>
+        <div class="home-badges">
+          <span class="badge badge-green">10 Módulos</span>
+          <span class="badge badge-blue">Presencial teórico–práctico</span>
+          <span class="badge badge-green">GlobalG.A.P. · Orgánico · Comercio Justo</span>
+        </div>
+      </div>
+      <div class="modules-grid" id="modules-grid"></div>
+    </div>
+
+    <!-- MODULE VIEW -->
+    <div class="view" id="view-module">
+      <div class="module-header">
+        <div class="module-header-top">
+          <div class="module-big-num" id="module-num-display">1</div>
+          <div>
+            <h2 id="module-title-display">Módulo</h2>
+            <p id="module-desc-display">Descripción</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-bar" id="admin-bar" style="display:none">
+        <div>
+          <p>Modo <strong>Administrador</strong> activo</p>
+          <p style="font-size:var(--text-xs);color:var(--color-text-faint)">Puedes subir y eliminar recursos.</p>
+        </div>
+        <button class="btn btn-primary" id="add-resource-btn">
+          <i data-lucide="plus" width="16" height="16"></i> Agregar recurso
+        </button>
+      </div>
+
+      <div id="resources-container">
+        <div class="spinner spinner-lg"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="pass-modal-overlay">
+  <div class="pass-modal">
+    <svg width="48" height="48" viewBox="0 0 32 32" fill="none" style="margin:0 auto var(--space-4);color:var(--color-primary)">
+      <circle cx="16" cy="16" r="15" fill="currentColor" opacity=".12"/>
+      <path d="M16 4 C10 8 7 13 9 19 C11 23 16 26 16 26 C16 26 21 23 23 19 C25 13 22 8 16 4Z" fill="currentColor"/>
+    </svg>
+    <h3>Panel Administrador</h3>
+    <p>Ingresa la contraseña para gestionar los recursos del curso.</p>
+    <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+      <input class="form-input" type="password" id="pass-input" placeholder="Contraseña..." autocomplete="current-password"/>
+      <div class="pass-error" id="pass-error"></div>
+    </div>
+    <div style="display:flex;gap:var(--space-3);justify-content:center;margin-top:var(--space-5)">
+      <button class="btn btn-secondary" id="pass-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="pass-confirm">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="upload-modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Agregar recurso</h3>
+      <button class="btn-icon" id="upload-modal-close"><i data-lucide="x" width="18" height="18"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="res-type">Tipo de recurso</label>
+        <select class="form-select" id="res-type">
+          <option value="file">📄 Archivo (PDF, Word, PPT, imagen...)</option>
+          <option value="video">🎬 Video (YouTube / Vimeo)</option>
+          <option value="link">🔗 Enlace externo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="res-name">Nombre del recurso</label>
+        <input class="form-input" type="text" id="res-name" placeholder="Ej: Presentación Módulo 1..."/>
+      </div>
+      <div id="file-section" class="form-group">
+        <label class="form-label">Archivo</label>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept="*/*"/>
+          <div class="upload-zone-icon"><i data-lucide="upload-cloud" width="28" height="28"></i></div>
+          <p style="font-weight:600">Arrastra o haz clic para seleccionar</p>
+          <p style="font-size:var(--text-xs);margin-top:4px" id="file-hint">PDF, PPT, Word, imagen, video... hasta 50 MB</p>
+        </div>
+        <div class="progress-bar-wrap" id="upload-progress-wrap" style="display:none">
+          <div class="progress-bar" id="upload-progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="url-section" class="form-group" style="display:none">
+        <label class="form-label" for="res-url">URL</label>
+        <input class="form-input" type="url" id="res-url" placeholder="https://..."/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="upload-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="upload-confirm">
+        <span id="upload-btn-text">Guardar recurso</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────
+const SUPABASE_URL = 'https://kvtyznnsvlvrwxprhydy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2dHl6bm5zdmx2cnd4cHJoeWR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjk3MTEsImV4cCI6MjA4OTYwNTcxMX0.tvkUPI6GErlcxmsnM1VCkV9ggg6CGcHy2tlxHc4UUbE';
+const BUCKET = 'course-resources';
+const ADMIN_PASSWORD = 'adobanano2025';
+const TABLE = 'course_resources';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ─── MODULES DATA ────────────────────────────────
+const MODULES = [
+  { id:1, name:'Introducción a las BPA', desc:'Conceptos, principios, certificaciones y marco normativo', day:1 },
+  { id:2, name:'Manejo del suelo y nutrición', desc:'Diagnóstico, fertilización racional y conservación del suelo', day:1 },
+  { id:3, name:'Manejo eficiente del agua', desc:'Sistemas de riego, programación y protección de fuentes', day:1 },
+  { id:4, name:'Manejo integrado de plagas y enfermedades', desc:'Sigatoka negra, monitoreo, control cultural y biológico', day:1 },
+  { id:5, name:'Manejo agronómico del cultivo', desc:'Material de siembra, deshije, deshoje y manejo del racimo', day:1 },
+  { id:6, name:'Inocuidad alimentaria en finca', desc:'Contaminación, postcosecha, higiene y trazabilidad', day:2 },
+  { id:7, name:'Salud y seguridad ocupacional', desc:'EPP, agroquímicos seguros, primeros auxilios y normativa', day:2 },
+  { id:8, name:'Gestión ambiental y sostenibilidad', desc:'Biodiversidad, residuos, huella de carbono y cambio climático', day:2 },
+  { id:9, name:'Registros, documentación y certificaciones', desc:'Tipos de registros, auditorías internas y certificaciones', day:2 },
+  { id:10, name:'Plan de mejora en finca', desc:'Diagnóstico participativo, brechas y plan de acción', day:2 },
+];
+
+// ─── STATE ───────────────────────────────────────
+let isAdmin = false;
+let activeModule = null;
+let resourceCounts = {};
+let uploadingFile = null;
+
+// ─── THEME ───────────────────────────────────────
+(function(){
+  const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
+  t&&t.addEventListener('click',()=>{
+    d=d==='dark'?'light':'dark';
+    r.setAttribute('data-theme',d);
+    t.innerHTML=d==='dark'?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  });
+})();
+
+// ─── TOAST ───────────────────────────────────────
+function toast(msg, type='') {
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className='toast '+(type||'');
+  t.textContent=msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3200);
+}
+
+// ─── INIT SIDEBAR + GRID ─────────────────────────
+function buildSidebar() {
+  const c = document.getElementById('sidebar-modules');
+  c.innerHTML = MODULES.map(m=>`
+    <div class="module-item" data-view="module" data-module="${m.id}" id="nav-mod-${m.id}">
+      <div class="module-num">${m.id}</div>
+      <span class="module-name">${m.name}</span>
+      <span class="resource-count" id="cnt-${m.id}">0</span>
+    </div>
+  `).join('');
+  c.querySelectorAll('.module-item').forEach(el=>{
+    el.addEventListener('click', ()=>{ navigateTo('module', +el.dataset.module); closeSidebar(); });
+  });
+}
+
+function buildGrid() {
+  const g = document.getElementById('modules-grid');
+  g.innerHTML = MODULES.map(m=>`
+    <div class="module-card" data-module="${m.id}">
+      <div class="module-card-num">${m.id}</div>
+      <h3>${m.name}</h3>
+      <p>${m.desc}</p>
+      <div class="module-card-footer">
+        <span class="badge badge-green" style="font-size:11px">Día ${m.day}</span>
+        <span class="module-card-arrow"><i data-lucide="arrow-right" width="16" height="16"></i></span>
+      </div>
+    </div>
+  `).join('');
+  g.querySelectorAll('.module-card').forEach(el=>{
+    el.addEventListener('click', ()=>navigateTo('module', +el.dataset.module));
+  });
+}
+
+// ─── NAVIGATION ──────────────────────────────────
+function navigateTo(view, moduleId) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.module-item').forEach(m=>m.classList.remove('active'));
+
+  if(view==='home') {
+    document.getElementById('view-home').classList.add('active');
+    document.getElementById('nav-home').classList.add('active');
+    document.getElementById('header-subtitle').textContent='Buenas Prácticas Agrícolas — ADOBANANO';
+    activeModule = null;
+  } else if(view==='module') {
+    activeModule = MODULES.find(m=>m.id===moduleId);
+    document.getElementById('view-module').classList.add('active');
+    document.getElementById(`nav-mod-${moduleId}`).classList.add('active');
+    renderModuleHeader(activeModule);
+    loadResources(moduleId);
+    document.getElementById('header-subtitle').textContent=`Módulo ${moduleId}: ${activeModule.name}`;
+  }
+  window.scrollTo(0,0);
+}
+
+function renderModuleHeader(m) {
+  document.getElementById('module-num-display').textContent = m.id;
+  document.getElementById('module-title-display').textContent = m.name;
+  document.getElementById('module-desc-display').textContent = m.desc;
+  document.getElementById('admin-bar').style.display = isAdmin ? 'flex' : 'none';
+}
+
+// ─── RESOURCES ───────────────────────────────────
+async function loadResources(moduleId) {
+  const cont = document.getElementById('resources-container');
+  cont.innerHTML = '<div class="spinner spinner-lg"></div>';
+
+  const { data, error } = await db.from(TABLE).select('*')
+    .eq('module_id', moduleId).order('created_at', {ascending:true});
+
+  if(error) {
+    cont.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i data-lucide="wifi-off" width="24" height="24"></i></div><h3>Error de conexión</h3><p>${error.message}</p></div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  // Update count
+  resourceCounts[moduleId] = data.length;
+  const cnt = document.getElementById(`cnt-${moduleId}`);
+  if(cnt) cnt.textContent = data.length;
+
+  if(data.length===0) {
+    cont.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon"><i data-lucide="folder-open" width="24" height="24"></i></div>
+        <h3>Sin recursos aún</h3>
+        <p>Este módulo no tiene materiales subidos todavía.</p>
+        ${isAdmin?`<button class="btn btn-primary" onclick="openUploadModal()"><i data-lucide="plus" width="16" height="16"></i> Agregar primero</button>`:''}
+      </div>`;
+  } else {
+    cont.innerHTML = `<div class="resources-list">${data.map(r=>renderResource(r)).join('')}</div>`;
+  }
+  lucide.createIcons();
+  attachResourceActions();
+}
+
+function getFileType(name='', url='', type='') {
+  if(type==='video') return 'video';
+  if(type==='link') return 'link';
+  const ext = (name.split('.').pop()||'').toLowerCase();
+  if(['pdf'].includes(ext)) return 'pdf';
+  if(['ppt','pptx'].includes(ext)) return 'ppt';
+  if(['doc','docx'].includes(ext)) return 'doc';
+  if(['jpg','jpeg','png','gif','webp','svg'].includes(ext)) return 'img';
+  if(['mp4','mov','avi','webm'].includes(ext)) return 'video';
+  return 'doc';
+}
+
+function getFileIcon(ft) {
+  const map = { pdf:'file-text', video:'play-circle', doc:'file', ppt:'presentation', img:'image', link:'external-link' };
+  return map[ft]||'file';
+}
+
+function renderResource(r) {
+  const ft = getFileType(r.file_name||'', r.url||'', r.resource_type||'');
+  const icon = getFileIcon(ft);
+  const date = new Date(r.created_at).toLocaleDateString('es-DO',{day:'2-digit',month:'short',year:'numeric'});
+  const typeLabel = {pdf:'PDF',video:'Video',doc:'Documento',ppt:'Presentación',img:'Imagen',link:'Enlace'}[ft]||'Archivo';
+  return `
+    <div class="resource-card" data-id="${r.id}" data-url="${r.url||''}" data-name="${r.file_name||r.name}">
+      <div class="resource-icon icon-${ft}"><i data-lucide="${icon}" width="20" height="20"></i></div>
+      <div class="resource-info">
+        <div class="resource-name">${r.name}</div>
+        <div class="resource-meta">${typeLabel} · ${date}</div>
+      </div>
+      <div class="resource-actions">
+        ${r.url ? `<button class="btn btn-secondary btn-sm open-btn" data-url="${r.url}" style="padding:6px 12px;font-size:var(--text-xs)"><i data-lucide="external-link" width="14" height="14"></i> Abrir</button>` : ''}
+        ${isAdmin ? `<button class="btn btn-danger del-btn" data-id="${r.id}" data-path="${r.storage_path||''}" style="padding:6px 10px;font-size:var(--text-xs)"><i data-lucide="trash-2" width="14" height="14"></i></button>` : ''}
+      </div>
+    </div>`;
+}
+
+function attachResourceActions() {
+  document.querySelectorAll('.open-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ window.open(btn.dataset.url, '_blank', 'noopener'); });
+  });
+  document.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>deleteResource(btn.dataset.id, btn.dataset.path));
+  });
+}
+
+async function deleteResource(id, path) {
+  if(!confirm('¿Eliminar este recurso? Esta acción no se puede deshacer.')) return;
+  if(path) { await db.storage.from(BUCKET).remove([path]); }
+  const { error } = await db.from(TABLE).delete().eq('id', id);
+  if(error) { toast('Error al eliminar: '+error.message, 'error'); return; }
+  toast('Recurso eliminado.', '');
+  loadResources(activeModule.id);
+}
+
+// ─── UPLOAD MODAL ────────────────────────────────
+function openUploadModal() {
+  document.getElementById('upload-modal-overlay').classList.add('open');
+  document.getElementById('res-name').value='';
+  document.getElementById('res-url').value='';
+  document.getElementById('res-type').value='file';
+  document.getElementById('file-hint').textContent='PDF, PPT, Word, imagen, video... hasta 50 MB';
+  document.getElementById('upload-progress-wrap').style.display='none';
+  document.getElementById('upload-progress-bar').style.width='0%';
+  document.getElementById('upload-btn-text').textContent='Guardar recurso';
+  uploadingFile=null;
+  toggleResType();
+}
+
+document.getElementById('add-resource-btn').addEventListener('click', openUploadModal);
+document.getElementById('upload-modal-close').addEventListener('click', closeUploadModal);
+document.getElementById('upload-cancel').addEventListener('click', closeUploadModal);
+function closeUploadModal() { document.getElementById('upload-modal-overlay').classList.remove('open'); }
+
+document.getElementById('res-type').addEventListener('change', toggleResType);
+function toggleResType() {
+  const t = document.getElementById('res-type').value;
+  document.getElementById('file-section').style.display = t==='file' ? 'flex':'none';
+  document.getElementById('url-section').style.display = t!=='file' ? 'flex':'none';
+}
+
+// File drag & drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', ()=>zone.classList.remove('drag'));
+zone.addEventListener('drop', e=>{ e.preventDefault(); zone.classList.remove('drag');
+  const f=e.dataTransfer.files[0]; if(f) setFile(f); });
+document.getElementById('file-input').addEventListener('change', e=>{ if(e.target.files[0]) setFile(e.target.files[0]); });
+
+function setFile(f) {
+  uploadingFile=f;
+  document.getElementById('file-hint').textContent=`✓ ${f.name} (${(f.size/1024/1024).toFixed(1)} MB)`;
+  if(!document.getElementById('res-name').value) {
+    document.getElementById('res-name').value = f.name.replace(/\.[^/.]+$/,'');
+  }
+}
+
+document.getElementById('upload-confirm').addEventListener('click', async ()=>{
+  const type = document.getElementById('res-type').value;
+  const name = document.getElementById('res-name').value.trim();
+  if(!name) { toast('Ingresa un nombre para el recurso.','error'); return; }
+
+  const btn = document.getElementById('upload-confirm');
+  const btnText = document.getElementById('upload-btn-text');
+  btn.disabled=true; btnText.textContent='Subiendo...';
+
+  try {
+    let url='', storagePath='', fileName='';
+
+    if(type==='file') {
+      if(!uploadingFile) { toast('Selecciona un archivo.','error'); btn.disabled=false; btnText.textContent='Guardar recurso'; return; }
+      const ext = uploadingFile.name.split('.').pop();
+      storagePath = `module-${activeModule.id}/${Date.now()}-${uploadingFile.name}`;
+      fileName = uploadingFile.name;
+
+      document.getElementById('upload-progress-wrap').style.display='block';
+      
+      const { data:upData, error:upErr } = await db.storage.from(BUCKET).upload(storagePath, uploadingFile, {
+        cacheControl:'3600', upsert:false
+      });
+      if(upErr) throw upErr;
+      
+      document.getElementById('upload-progress-bar').style.width='100%';
+      const { data:urlData } = db.storage.from(BUCKET).getPublicUrl(storagePath);
+      url = urlData.publicUrl;
+    } else {
+      url = document.getElementById('res-url').value.trim();
+      if(!url) { toast('Ingresa una URL válida.','error'); btn.disabled=false; btnText.textContent='Guardar recurso'; return; }
+    }
+
+    const { error } = await db.from(TABLE).insert({
+      module_id: activeModule.id, name, resource_type: type,
+      url, storage_path: storagePath, file_name: fileName
+    });
+    if(error) throw error;
+
+    toast('✓ Recurso agregado correctamente.','success');
+    closeUploadModal();
+    loadResources(activeModule.id);
+  } catch(e) {
+    toast('Error: '+e.message,'error');
+    btn.disabled=false; btnText.textContent='Guardar recurso';
+  }
+});
+
+// ─── ADMIN ACCESS ────────────────────────────────
+document.getElementById('admin-toggle-btn').addEventListener('click', ()=>{
+  if(isAdmin) { isAdmin=false; toast('Modo administrador desactivado.'); updateAdminUI(); return; }
+  document.getElementById('pass-modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pass-input').focus(),200);
+});
+document.getElementById('pass-cancel').addEventListener('click', ()=>{
+  document.getElementById('pass-modal-overlay').classList.remove('open');
+  document.getElementById('pass-error').textContent='';
+});
+document.getElementById('pass-input').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPass(); });
+document.getElementById('pass-confirm').addEventListener('click', confirmPass);
+
+function confirmPass() {
+  const val = document.getElementById('pass-input').value;
+  if(val===ADMIN_PASSWORD) {
+    isAdmin=true;
+    document.getElementById('pass-modal-overlay').classList.remove('open');
+    document.getElementById('pass-input').value='';
+    document.getElementById('pass-error').textContent='';
+    toast('✓ Modo administrador activado.','success');
+    updateAdminUI();
+  } else {
+    document.getElementById('pass-error').textContent='Contraseña incorrecta. Intenta nuevamente.';
+    document.getElementById('pass-input').select();
+  }
+}
+
+function updateAdminUI() {
+  document.getElementById('admin-toggle-btn').style.color = isAdmin ? 'var(--color-primary)' : '';
+  if(activeModule) { renderModuleHeader(activeModule); loadResources(activeModule.id); }
+}
+
+// ─── SIDEBAR TOGGLE ──────────────────────────────
+document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
+document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+function toggleSidebar() {
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('sidebar-overlay');
+  s.classList.toggle('open');
+  o.classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// NAV HOME
+document.getElementById('nav-home').addEventListener('click', ()=>{ navigateTo('home'); closeSidebar(); });
+
+// ─── INIT ─────────────────────────────────────────
+buildSidebar();
+buildGrid();
+navigateTo('home');
+lucide.createIcons();
+
+// Load all resource counts for sidebar
+async function loadAllCounts() {
+  const { data } = await db.from(TABLE).select('module_id');
+  if(!data) return;
+  const counts = {};
+  data.forEach(r=>{ counts[r.module_id]=(counts[r.module_id]||0)+1; });
+  MODULES.forEach(m=>{
+    const el = document.getElementById(`cnt-${m.id}`);
+    if(el) el.textContent = counts[m.id]||0;
+    resourceCounts[m.id] = counts[m.id]||0;
+    // update grid cards badge
+  });
+}
+loadAllCounts();
+</script>
+</body>
+</html>
+<!-- SETUP INSTRUCTIONS (hidden in production) -->
+<!-- 
+=== INSTRUCCIONES DE CONFIGURACIÓN SUPABASE ===
+
+1. Ve a: https://supabase.com/dashboard/project/kvtyznnsvlvrwxprhydy/sql
+
+2. Ejecuta este SQL:
+
+CREATE TABLE IF NOT EXISTS public.course_resources (
+  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  module_id     integer NOT NULL,
+  name          text NOT NULL,
+  resource_type text NOT NULL DEFAULT 'file',
+  url           text,
+  storage_path  text,
+  file_name     text,
+  created_at    timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.course_resources ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read" ON public.course_resources
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow insert" ON public.course_resources
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow delete" ON public.course_resources
+  FOR DELETE USING (true);
+
+3. Ve a Storage → Create bucket:
+   - Name: course-resources
+   - Public: YES (toggle ON)
+
+4. En Storage → Policies, permite upload/delete para anon (o usa la plantilla "Give users access to their own top level folder")
+
+-->
